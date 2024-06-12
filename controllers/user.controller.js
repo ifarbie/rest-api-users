@@ -1,23 +1,26 @@
 const { Users } = require("../models");
 
 const getUsers = async (req, res) => {
-  const user = await Users.findAll();
+  const users = await Users.findAll();
 
-  if(!user) return res.status(404).json({ message: "User not found" });
+  if (!users) return res.status(404).json({ message: "Users are empty" });
 
   return res.status(200).json({
-    user,
+    users,
   });
 };
 
 const getUserById = async (req, res) => {
-  const users = await Users.findOne({
+  const user = await Users.findOne({
     where: {
-      id: req.params.id
-    }
+      id: req.params.id,
+    },
   });
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
   return res.status(200).json({
-    users,
+    user,
   });
 };
 
@@ -71,6 +74,7 @@ const deleteUser = async (req, res) => {
 
 const editUser = async (req, res) => {
   const { fullname, email, password } = req.body;
+
   if (fullname || email || password) {
     const prevData = await Users.findOne({
       where: {
@@ -94,7 +98,6 @@ const editUser = async (req, res) => {
       prevData.email = email;
     }
     if (password) prevData.password = password;
-
     prevData.save();
 
     return res.status(200).json({
@@ -104,8 +107,8 @@ const editUser = async (req, res) => {
   }
 
   return res.status(400).json({
-    message: "Bad request"
-  })
+    message: "fullname, email, or password are required",
+  });
 };
 
 module.exports = { getUsers, getUserById, createUser, deleteUser, editUser };

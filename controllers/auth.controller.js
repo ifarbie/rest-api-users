@@ -1,30 +1,34 @@
 const jwt = require("jsonwebtoken");
+const { Users } = require("../models/");
 
-const loginUser = (req, res) => {
-  // FAKE DATA
-  const user = {
-    email: "test@example.com",
-    password: "test",
-  };
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
-  if (user.email === email && user.password === password) {
-    jwt.sign(user, "secret", (err, token) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          message: err,
-        });
-      }
-      const Token = token;
-      return res.status(200).json({    
-        token: Token,
+  if (!email || !password) return res.status(400).json({ message: "Email and password are required" });
+
+  const user = await Users.findOne({
+    where: {
+      email,
+      password,
+    },
+  });
+  if (!user) return res.status(400).json({ message: "Your email/password is wrong!" });
+
+  jwt.sign({ fullname: user.fullname, email, password }, "secret", { expiresIn: "5m" }, (err, token) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({
+        user,
+        message: err,
       });
+    }
+
+    res.setHeader("Authorization", `Bearer ${token}`);
+
+    return res.status(200).json({
+      message: "User login!",
+      user,
     });
-  } else {      // Jika tidak menggunakan else, kode dibawah tetap running
-    return res.status(400).json({
-      message: "Login failed",
-    });
-  }
+  });
 };
 
 module.exports = { loginUser };
