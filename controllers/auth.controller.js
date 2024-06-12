@@ -13,7 +13,7 @@ const loginUser = async (req, res) => {
   });
   if (!user) return res.status(400).json({ message: "Your email/password is wrong!" });
 
-  jwt.sign({ fullname: user.fullname, email, password }, "secret", { expiresIn: "5m" }, (err, token) => {
+  jwt.sign({ fullname: user.fullname, email, password }, "secret", { expiresIn: "1h" }, (err, token) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
